@@ -24,4 +24,7 @@ jobs:
           version: v1.54
 
       - name: Test
-        run: make test
+        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
