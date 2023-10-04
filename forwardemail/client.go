@@ -42,7 +42,7 @@ func (c *Client) newRequest(method, path string) (*http.Request, error) {
 		return nil, err
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Basic %s:", c.ApiKey))
+	req.SetBasicAuth(c.ApiKey, "")
 
 	return req, nil
 }
