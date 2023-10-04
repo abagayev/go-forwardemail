@@ -1,6 +1,10 @@
 package forwardemail
 
-import "net/http"
+import (
+	"fmt"
+	"io"
+	"net/http"
+)
 
 const (
 	forwardemailApiUrl = "https://api.forwardemail.net"
@@ -30,4 +34,34 @@ func NewClient(options ClientOptions) *Client {
 		ApiUrl:     apiUrl,
 		HttpClient: http.DefaultClient,
 	}
+}
+
+func (c *Client) newRequest(method, path string) (*http.Request, error) {
+	req, err := http.NewRequest(method, c.ApiUrl+path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Basic %s:", c.ApiKey))
+
+	return req, nil
+}
+
+func (c *Client) doRequest(req *http.Request) ([]byte, error) {
+	res, err := c.HttpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode == http.StatusOK || res.StatusCode == http.StatusNoContent {
+		return body, err
+	}
+
+	return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 }
