@@ -3,6 +3,9 @@ package forwardemail
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -76,9 +79,11 @@ func (c *Client) CreateDomain(name string) error {
 		return err
 	}
 
-	q := req.URL.Query()
-	q.Add("domain", name)
-	req.URL.RawQuery = q.Encode()
+	params := url.Values{}
+	params.Add("domain", name)
+
+	req.Body = io.NopCloser(strings.NewReader(params.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	_, err = c.doRequest(req)
 	if err != nil {
