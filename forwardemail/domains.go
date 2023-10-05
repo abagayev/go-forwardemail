@@ -69,3 +69,35 @@ func (c *Client) GetDomain(name string) (*Domain, error) {
 
 	return &item, nil
 }
+
+func (c *Client) CreateDomain(name string) error {
+	req, err := c.newRequest("POST", "/v1/domains")
+	if err != nil {
+		return err
+	}
+
+	q := req.URL.Query()
+	q.Add("domain", name)
+	req.URL.RawQuery = q.Encode()
+
+	_, err = c.doRequest(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteDomain(name string) error {
+	req, err := c.newRequest("DELETE", fmt.Sprintf("/v1/domains/%s", name))
+	if err != nil {
+		return err
+	}
+
+	_, err = c.doRequest(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
