@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestClientUpperCase(t *testing.T) {
+func TestClient_GetAccount(t *testing.T) {
 	tests := []struct {
 		name     string
 		response string
