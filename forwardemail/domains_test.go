@@ -201,6 +201,172 @@ func TestClient_GetDomains(t *testing.T) {
 	}
 }
 
+func TestClient_CreateDomain(t *testing.T) {
+	tests := []struct {
+		name       string
+		domain     string
+		parameters DomainParameters
+		response   string
+		want       *Domain
+	}{
+		{
+			name: "no data",
+		},
+		{
+			name:   "ok",
+			domain: "stark.com",
+			parameters: DomainParameters{
+				HasAdultContentProtection: pointBool(true),
+				HasPhishingProtection:     pointBool(true),
+				HasExecutableProtection:   pointBool(true),
+				HasVirusProtection:        pointBool(true),
+				HasRecipientVerification:  pointBool(true),
+			},
+			response: `{
+				  "has_adult_content_protection": true,
+				  "has_phishing_protection": true,
+				  "has_executable_protection": true,
+				  "has_virus_protection": true,
+				  "is_catchall_regex_disabled": false,
+				  "plan": "enhanced_protection",
+				  "max_recipients_per_alias": 10,
+				  "smtp_port": "25",
+				  "name": "stark.com",
+				  "has_mx_record": true,
+				  "has_txt_record": true,
+				  "has_recipient_verification": false,
+				  "has_custom_verification": false,
+				  "verification_record": "v8O0S8JjRv",
+				  "id": "15ff615b6180f1fc7faf40e6",
+				  "object": "domain",
+				  "created_at": "2023-09-21T20:18:24.790Z",
+				  "updated_at": "2023-10-07T21:21:01.992Z",
+				  "last_allowlist_sync_at": "2023-10-07T13:06:02.630Z",
+				  "link": "https://forwardemail.net/my-account/domains/stark.com"
+			}`,
+			want: &Domain{
+				HasAdultContentProtection: true,
+				HasPhishingProtection:     true,
+				HasExecutableProtection:   true,
+				HasVirusProtection:        true,
+				Plan:                      "enhanced_protection",
+				MaxRecipientsPerAlias:     10,
+				SmtpPort:                  "25",
+				Name:                      "stark.com",
+				HasMxRecord:               true,
+				HasTxtRecord:              true,
+				VerificationRecord:        "v8O0S8JjRv",
+				Id:                        "15ff615b6180f1fc7faf40e6",
+				Object:                    "domain",
+				CreatedAt:                 parseTime("2023-09-21T20:18:24.790Z"),
+				UpdatedAt:                 parseTime("2023-10-07T21:21:01.992Z"),
+				Link:                      "https://forwardemail.net/my-account/domains/stark.com",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				fmt.Fprintf(w, tt.response)
+			}))
+			defer svr.Close()
+
+			c := NewClient(ClientOptions{
+				ApiUrl: svr.URL,
+			})
+
+			got, _ := c.CreateDomain(tt.domain, tt.parameters)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Fatalf("values are not the same %s", diff)
+			}
+		})
+	}
+}
+
+func TestClient_UpdateDomain(t *testing.T) {
+	tests := []struct {
+		name       string
+		domain     string
+		parameters DomainParameters
+		response   string
+		want       *Domain
+	}{
+		{
+			name: "no data",
+		},
+		{
+			name:   "ok",
+			domain: "stark.com",
+			parameters: DomainParameters{
+				HasAdultContentProtection: pointBool(true),
+				HasPhishingProtection:     pointBool(true),
+				HasExecutableProtection:   pointBool(true),
+				HasVirusProtection:        pointBool(true),
+				HasRecipientVerification:  pointBool(true),
+			},
+			response: `{
+				  "has_adult_content_protection": true,
+				  "has_phishing_protection": true,
+				  "has_executable_protection": true,
+				  "has_virus_protection": true,
+				  "is_catchall_regex_disabled": false,
+				  "plan": "enhanced_protection",
+				  "max_recipients_per_alias": 10,
+				  "smtp_port": "25",
+				  "name": "stark.com",
+				  "has_mx_record": true,
+				  "has_txt_record": true,
+				  "has_recipient_verification": false,
+				  "has_custom_verification": false,
+				  "verification_record": "v8O0S8JjRv",
+				  "id": "15ff615b6180f1fc7faf40e6",
+				  "object": "domain",
+				  "created_at": "2023-09-21T20:18:24.790Z",
+				  "updated_at": "2023-10-07T21:21:01.992Z",
+				  "last_allowlist_sync_at": "2023-10-07T13:06:02.630Z",
+				  "link": "https://forwardemail.net/my-account/domains/stark.com"
+			}`,
+			want: &Domain{
+				HasAdultContentProtection: true,
+				HasPhishingProtection:     true,
+				HasExecutableProtection:   true,
+				HasVirusProtection:        true,
+				Plan:                      "enhanced_protection",
+				MaxRecipientsPerAlias:     10,
+				SmtpPort:                  "25",
+				Name:                      "stark.com",
+				HasMxRecord:               true,
+				HasTxtRecord:              true,
+				VerificationRecord:        "v8O0S8JjRv",
+				Id:                        "15ff615b6180f1fc7faf40e6",
+				Object:                    "domain",
+				CreatedAt:                 parseTime("2023-09-21T20:18:24.790Z"),
+				UpdatedAt:                 parseTime("2023-10-07T21:21:01.992Z"),
+				Link:                      "https://forwardemail.net/my-account/domains/stark.com",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				fmt.Fprintf(w, tt.response)
+			}))
+			defer svr.Close()
+
+			c := NewClient(ClientOptions{
+				ApiUrl: svr.URL,
+			})
+
+			got, _ := c.UpdateDomain(tt.domain, tt.parameters)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Fatalf("values are not the same %s", diff)
+			}
+		})
+	}
+}
+
 func TestClient_DeleteDomain(t *testing.T) {
 	type response struct {
 		code int
@@ -256,4 +422,8 @@ func equateErrorMessage(x, y error) bool {
 		return x == nil && y == nil
 	}
 	return x.Error() == y.Error()
+}
+
+func pointBool(b bool) *bool {
+	return &b
 }
