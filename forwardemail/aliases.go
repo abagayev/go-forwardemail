@@ -74,7 +74,7 @@ func (c *Client) GetAlias(domain string, alias string) (*Alias, error) {
 }
 
 func (c *Client) CreateAlias(domain string, alias string, parameters AliasParameters) (*Alias, error) {
-	req, err := c.newRequest("POST", fmt.Sprintf("/v1/domains/%s/aliases/%s", domain, alias))
+	req, err := c.newRequest("POST", fmt.Sprintf("/v1/domains/%s/aliases", domain))
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +92,8 @@ func (c *Client) CreateAlias(domain string, alias string, parameters AliasParame
 	}
 
 	for k, v := range map[string]*[]string{
-		"has_recipient_verification": parameters.Recipients,
-		"labels":                     parameters.Labels,
+		"recipients": parameters.Recipients,
+		"labels":     parameters.Labels,
 	} {
 		if v != nil {
 			for _, vv := range *v {
