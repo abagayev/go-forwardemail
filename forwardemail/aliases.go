@@ -139,8 +139,8 @@ func (c *Client) UpdateAlias(domain string, alias string, parameters AliasParame
 	}
 
 	for k, v := range map[string]*[]string{
-		"has_recipient_verification": parameters.Recipients,
-		"labels":                     parameters.Labels,
+		"recipients": parameters.Recipients,
+		"labels":     parameters.Labels,
 	} {
 		if v != nil {
 			for _, vv := range *v {
