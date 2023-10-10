@@ -3,6 +3,10 @@ package forwardemail
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/url"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -18,6 +22,13 @@ type Alias struct {
 	Object                   string    `json:"object"`
 	CreatedAt                time.Time `json:"created_at"`
 	UpdatedAt                time.Time `json:"updated_at"`
+}
+
+type AliasParameters struct {
+	Recipients               *[]string
+	Labels                   *[]string
+	HasRecipientVerification *bool
+	IsEnabled                *bool
 }
 
 func (c *Client) GetAliases(domain string) ([]Alias, error) {
@@ -46,6 +57,100 @@ func (c *Client) GetAlias(domain string, alias string) (*Alias, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	res, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var item Alias
+
+	err = json.Unmarshal(res, &item)
+	if err != nil {
+		return nil, err
+	}
+
+	return &item, nil
+}
+
+func (c *Client) CreateAlias(domain string, alias string, parameters AliasParameters) (*Alias, error) {
+	req, err := c.newRequest("POST", fmt.Sprintf("/v1/domains/%s/aliases/%s", domain, alias))
+	if err != nil {
+		return nil, err
+	}
+
+	params := url.Values{}
+	params.Add("name", alias)
+
+	for k, v := range map[string]*bool{
+		"has_recipient_verification": parameters.HasRecipientVerification,
+		"is_enabled":                 parameters.IsEnabled,
+	} {
+		if v != nil {
+			params.Add(k, strconv.FormatBool(*v))
+		}
+	}
+
+	for k, v := range map[string]*[]string{
+		"has_recipient_verification": parameters.Recipients,
+		"labels":                     parameters.Labels,
+	} {
+		if v != nil {
+			for _, vv := range *v {
+				params.Add(k, vv)
+			}
+		}
+	}
+
+	req.Body = io.NopCloser(strings.NewReader(params.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	res, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var item Alias
+
+	err = json.Unmarshal(res, &item)
+	if err != nil {
+		return nil, err
+	}
+
+	return &item, nil
+}
+
+func (c *Client) UpdateAlias(domain string, alias string, parameters AliasParameters) (*Alias, error) {
+	req, err := c.newRequest("PUT", fmt.Sprintf("/v1/domains/%s/aliases/%s", domain, alias))
+	if err != nil {
+		return nil, err
+	}
+
+	params := url.Values{}
+	params.Add("name", alias)
+
+	for k, v := range map[string]*bool{
+		"has_recipient_verification": parameters.HasRecipientVerification,
+		"is_enabled":                 parameters.IsEnabled,
+	} {
+		if v != nil {
+			params.Add(k, strconv.FormatBool(*v))
+		}
+	}
+
+	for k, v := range map[string]*[]string{
+		"has_recipient_verification": parameters.Recipients,
+		"labels":                     parameters.Labels,
+	} {
+		if v != nil {
+			for _, vv := range *v {
+				params.Add(k, vv)
+			}
+		}
+	}
+
+	req.Body = io.NopCloser(strings.NewReader(params.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := c.doRequest(req)
 	if err != nil {
