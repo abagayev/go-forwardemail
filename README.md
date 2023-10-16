@@ -19,7 +19,7 @@ $ go get github.com/abagayev/go-forwardemail
 import "github.com/abagayev/go-forwardemail/forwardemail"
 
 client := forwardemail.NewClient(forwardemail.ClientOptions{
-ApiKey: key,
+    ApiKey: key,
 })
 
 account, err := client.GetAccount()
