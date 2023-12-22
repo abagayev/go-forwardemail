@@ -2,6 +2,8 @@ package forwardemail
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -42,6 +44,7 @@ func TestClient_GetAlias(t *testing.T) {
 				  "id": "15ff615b6180f1fc7faf40e6"
 				},
 				"name": "tony",
+				"description": "main email",
 				"labels": [
 				  "catch-all"
 				],
@@ -66,6 +69,7 @@ func TestClient_GetAlias(t *testing.T) {
 					Id:   "15ff615b6180f1fc7faf40e6",
 				},
 				Name:                     "tony",
+				Description:              "main email",
 				Labels:                   []string{"catch-all"},
 				IsEnabled:                true,
 				HasRecipientVerification: true,
@@ -128,6 +132,7 @@ func TestClient_GetAliases(t *testing.T) {
 					  "id": "15ff615b6180f1fc7faf40e6"
 					},
 					"name": "tony",
+					"description": "main email",
 					"labels": [
 					  "catch-all"
 					],
@@ -178,6 +183,7 @@ func TestClient_GetAliases(t *testing.T) {
 						Id:   "15ff615b6180f1fc7faf40e6",
 					},
 					Name:                     "tony",
+					Description:              "main email",
 					Labels:                   []string{"catch-all"},
 					IsEnabled:                true,
 					HasRecipientVerification: true,
@@ -253,6 +259,7 @@ func TestClient_CreateAlias(t *testing.T) {
 				alias:  "*",
 				params: AliasParameters{
 					Recipients:               pointSliceOfStrings([]string{"james@rhodes.com"}),
+					Description:              "main email",
 					Labels:                   pointSliceOfStrings([]string{"catch-all"}),
 					IsEnabled:                pointBool(true),
 					HasRecipientVerification: pointBool(true),
@@ -269,6 +276,7 @@ func TestClient_CreateAlias(t *testing.T) {
 				  "id": "15ff615b6180f1fc7faf40e6"
 				},
 				"name": "*",
+				"description": "main email",
 				"labels": [
 				  "catch-all"
 				],
@@ -293,6 +301,7 @@ func TestClient_CreateAlias(t *testing.T) {
 					Id:   "15ff615b6180f1fc7faf40e6",
 				},
 				Name:                     "*",
+				Description:              "main email",
 				Labels:                   []string{"catch-all"},
 				IsEnabled:                true,
 				HasRecipientVerification: true,
@@ -308,6 +317,8 @@ func TestClient_CreateAlias(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				logRequestBody(r, t)
+
 				fmt.Fprintf(w, tt.res)
 			}))
 			defer svr.Close()
@@ -346,6 +357,7 @@ func TestClient_UpdateAlias(t *testing.T) {
 				domain: "stark.com",
 				alias:  "james",
 				params: AliasParameters{
+					Description:              "main email",
 					Recipients:               pointSliceOfStrings([]string{"james@rhodes.com"}),
 					Labels:                   pointSliceOfStrings([]string{"catch-all", "friends"}),
 					IsEnabled:                pointBool(true),
@@ -363,6 +375,7 @@ func TestClient_UpdateAlias(t *testing.T) {
 				  "id": "15ff615b6180f1fc7faf40e6"
 				},
 				"name": "james",
+				"description": "main email",
 				"labels": [
 				  "catch-all",
 				  "friends"
@@ -388,6 +401,7 @@ func TestClient_UpdateAlias(t *testing.T) {
 					Id:   "15ff615b6180f1fc7faf40e6",
 				},
 				Name:                     "james",
+				Description:              "main email",
 				Labels:                   []string{"catch-all", "friends"},
 				IsEnabled:                true,
 				HasRecipientVerification: true,
@@ -403,6 +417,8 @@ func TestClient_UpdateAlias(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				logRequestBody(r, t)
+
 				fmt.Fprintf(w, tt.res)
 			}))
 			defer svr.Close()
@@ -473,4 +489,12 @@ func TestClient_DeleteAlias(t *testing.T) {
 
 func pointSliceOfStrings(s []string) *[]string {
 	return &s
+}
+
+func logRequestBody(r *http.Request, t *testing.T) {
+	b, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	t.Logf("body encoded fields: %s", b)
 }
