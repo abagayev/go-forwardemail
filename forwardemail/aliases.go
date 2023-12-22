@@ -14,6 +14,7 @@ type Alias struct {
 	Account                  Account   `json:"user"`
 	Domain                   Domain    `json:"domain"`
 	Name                     string    `json:"name"`
+	Description              string    `json:"description"`
 	Labels                   []string  `json:"labels"`
 	IsEnabled                bool      `json:"is_enabled"`
 	HasRecipientVerification bool      `json:"has_recipient_verification"`
@@ -26,6 +27,7 @@ type Alias struct {
 
 type AliasParameters struct {
 	Recipients               *[]string
+	Description              string `json:"description"`
 	Labels                   *[]string
 	HasRecipientVerification *bool
 	IsEnabled                *bool
@@ -81,6 +83,9 @@ func (c *Client) CreateAlias(domain string, alias string, parameters AliasParame
 
 	params := url.Values{}
 	params.Add("name", alias)
+	if parameters.Description != "" {
+		params.Add("description", parameters.Description)
+	}
 
 	for k, v := range map[string]*bool{
 		"has_recipient_verification": parameters.HasRecipientVerification,
@@ -128,6 +133,9 @@ func (c *Client) UpdateAlias(domain string, alias string, parameters AliasParame
 
 	params := url.Values{}
 	params.Add("name", alias)
+	if parameters.Description != "" {
+		params.Add("description", parameters.Description)
+	}
 
 	for k, v := range map[string]*bool{
 		"has_recipient_verification": parameters.HasRecipientVerification,
